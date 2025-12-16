@@ -12,7 +12,7 @@ const portNumberValidation = async (ip) => {
     return sendMessage(false, "Enter the valid ip");
   }
 
-  console.log("xss valid ", xss_validation(ip));
+  // console.log("xss valid ", xss_validation(ip));
   if (xss_validation(ip) === false) {
     return sendMessage(false, "Not a valid IP formate");
   }
