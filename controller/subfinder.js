@@ -21,7 +21,7 @@ async function checkSubdomain(sub) {
 }
 
 // use with request
-const check_Deep = async (domainName, timeOut = 3000) => {
+const check_Deep = async (domainName, timeOut=3000) => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeOut);
   try {
@@ -46,14 +46,15 @@ let trace = false;
 
 const loop_clsoe = (req,res) => {
  trace = true;
- return;
 }
 
 
 
 const subFinder = async (req, res) => {
   const domainName = req.query.domainName;
-  trace = req.query.flag === "true";
+  const flag = req.query.flag;
+  console.log("flag ",flag);
+  // trace = req.query.flag === "true";
   // console.log(trace);
   // if (domainName == true) {
   //   trace = true;
@@ -82,7 +83,15 @@ const subFinder = async (req, res) => {
     const domName = `${sub_list[i]}.${domainName}`;
     const status = await check_Deep(domName);
     const fullResult = `https://${domName}`;
-    const domainResult = { fullResult: fullResult };
+    console.log(status);
+    let domainResult;
+    if(flag !== "null")
+    {
+      domainResult = { fullResult: fullResult,status:status };
+    }
+    else if(flag === "null"){
+      domainResult = { fullResult: fullResult };
+    }
     if (status) {
       sendToClient(`data: ${JSON.stringify(domainResult)}\n\n`);
     }

@@ -6,7 +6,7 @@ const sleepOnreq = require("../controller/sleepOn");
 
 
 route.get("/subdomain",subFinder);
-route.get("/cancel",loop_clsoe);
+route.post("/cancel",loop_clsoe);
 route.get("/port",check_Port);
 route.post("/cancel",cancel_req);
 route.get("/sleep",sleepOnreq);
