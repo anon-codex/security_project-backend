@@ -11,14 +11,23 @@ let live_dns_sub = [];
 async function checkSubdomain(sub) {
   try {
     const records = await dns.resolve(sub);
-    live_dns_sub.push(sub);
+    if(records)
+    {
+          return records;
+    }
+    // if(records !== null)
+    // {
+    //   live_dns_sub.push(sub);
+    // }
     // console.log(`[+] Found: ${sub}`);
-    return records;
+   return null;
   } catch (error) {
     // console.log(error);
     return null;
   }
 }
+
+
 
 // use with request
 const check_Deep = async (domainName, timeOut=3000) => {
@@ -53,12 +62,12 @@ const loop_clsoe = (req,res) => {
 const subFinder = async (req, res) => {
   const domainName = req.query.domainName;
   const flag = req.query.flag;
+  const fastScan = req.query.fastScan;
   console.log("flag ",flag);
-  // trace = req.query.flag === "true";
-  // console.log(trace);
-  // if (domainName == true) {
-  //   trace = true;
-  // }
+  console.log("fastScan ",fastScan);
+
+
+
 
   let result = await domainNameValidation(domainName);
 
@@ -66,15 +75,48 @@ const subFinder = async (req, res) => {
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
+
+  // create this function for send the data
   const sendToClient = (data) => {
     res.write(`data: ${JSON.stringify(data)}\n\n`);
   };
 
+  // check domain name is valid or not
   if (!result.success && result != true) {
     sendToClient(`data: ${JSON.stringify(result)}\n\n`);
     return;
   }
+ 
+  // for the fast scan
+ if(fastScan === "true")
+ {
+    console.log("Fast scan running");
+   for (let i = 0; i < sub_list.length; i++) {
+    if (trace === true) {
+      trace = false;
+      break;
+    }
+    const domName = `${sub_list[i]}.${domainName}`;
+    const status = await checkSubdomain(domName);
+    const fullResult = `https://${domName}`;
+    console.log(status);
+    // let domainResult;
+    if(status !== null){
+      domainResult = { fullResult: fullResult };
+    }
+    if (status !== null) {
+      sendToClient(`data: ${JSON.stringify(domainResult)}\n\n`);
+    }
+  }
+ }
 
+
+
+
+  // for the normal scan
+  if(flag !== null && fastScan !== true)
+  {
+    console.log("normal scan running");
   for (let i = 0; i < sub_list.length; i++) {
     if (trace === true) {
       trace = false;
@@ -95,6 +137,7 @@ const subFinder = async (req, res) => {
     if (status) {
       sendToClient(`data: ${JSON.stringify(domainResult)}\n\n`);
     }
+  }
   }
 
   res.write("event: end\n");
